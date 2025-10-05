@@ -13,3 +13,4 @@ VERDE = (0, 200, 0)      # Jugador
 GRIS = (180, 180, 180)   # Plataformas Día
 VIOLETA = (140, 70, 200) # Plataformas Noche
 ROJO = (200, 0, 0)       # Enemigos
+AMARILLO = (255, 215, 0)  # Fragmentos

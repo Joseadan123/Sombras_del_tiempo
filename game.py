@@ -1,9 +1,10 @@
 # game.py
 import pygame, sys
-from config import ANCHO, ALTO, FPS, AZUL, MORADO
+from config import ANCHO, ALTO, FPS, AZUL, MORADO, BLANCO
 from jugador import Jugador
 from plataforma import Plataforma
 from enemigo import Enemigo
+from fragmento import Fragmento
 
 class Game:
     def __init__(self):
@@ -13,11 +14,13 @@ class Game:
         self.clock = pygame.time.Clock()
         self.mundo_dia = True
         self.running = True
+        self.nivel_completado = False
 
         # Grupos
         self.todos = pygame.sprite.Group()
         self.plataformas = []
         self.enemigos = pygame.sprite.Group()
+        self.fragmentos = pygame.sprite.Group()
 
         # Jugador
         self.jugador = Jugador()
@@ -26,6 +29,7 @@ class Game:
         # Crear elementos
         self.crear_plataformas()
         self.crear_enemigos()
+        self.crear_fragmento()
 
     def crear_plataformas(self):
         piso = Plataforma(0, ALTO-40, ANCHO, 40, "dia")
@@ -42,11 +46,31 @@ class Game:
         self.todos.add(e1, e2)
         self.enemigos.add(e1, e2)
 
+    def crear_fragmento(self):
+        f = Fragmento(700, 250)
+        self.todos.add(f)
+        self.fragmentos.add(f)
+
     def verificar_colisiones(self):
+        # Enemigos activos
         for enemigo in self.enemigos:
             if enemigo.activo and self.jugador.rect.colliderect(enemigo.rect):
                 print("💀 Nilo ha sido derrotado.")
                 self.running = False
+
+        # Fragmento
+        for fragmento in self.fragmentos:
+            if self.jugador.rect.colliderect(fragmento.rect):
+                fragmento.recoger()
+                self.nivel_completado = True
+
+    def mostrar_mensaje(self, texto):
+        fuente = pygame.font.SysFont("arial", 40, True)
+        render = fuente.render(texto, True, BLANCO)
+        rect = render.get_rect(center=(ANCHO//2, ALTO//2))
+        self.ventana.blit(render, rect)
+        pygame.display.flip()
+        pygame.time.wait(2000)
 
     def run(self):
         while self.running:
@@ -74,6 +98,11 @@ class Game:
 
             # Colisiones
             self.verificar_colisiones()
+
+            # Mostrar mensaje de victoria
+            if self.nivel_completado:
+                self.mostrar_mensaje("¡Fragmento obtenido! ✨")
+                self.running = False
 
             pygame.display.flip()
             self.clock.tick(FPS)
