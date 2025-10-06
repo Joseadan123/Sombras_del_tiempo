@@ -1,4 +1,4 @@
-# ⏳ Sombras del Tiempo
+# Sombras del Tiempo
 
 **Sombras del Tiempo** es un videojuego **2D de plataformas** con elementos de **puzzle y exploración temporal**, desarrollado en **Python** utilizando **Pygame**.  
 Controlas a **Nilo**, un aprendiz de guardián del tiempo que debe restaurar el equilibrio entre las dimensiones del **Día** y la **Noche** recolectando fragmentos del reloj sagrado.  
@@ -7,7 +7,7 @@ Tu misión es sobrevivir y pensar estratégicamente para usar el poder del tiemp
 
 ---
 
-## 🧭 Acerca del Juego
+## Acerca del Juego
 
 **Género:** Plataformas 2D / Puzzle  
 **Público objetivo:** Todo público que disfrute de retos mentales y visuales en juegos indie retro.  
@@ -47,11 +47,11 @@ Solo Nilo puede alternar entre el Día y la Noche para superar obstáculos y res
 
 El juego está desarrollado con **Pygame** y **Python 3.x**, pensado principalmente para **PC (Windows)**, pero compatible con **Linux** y **macOS**.
 
-### 1️⃣ Requisitos
+### Requisitos
 
 Instala **Python 3.x** desde [python.org](https://www.python.org/downloads/).
 
-### 2️⃣ Instalación de Librerías
+### Instalación de Librerías
 
 Ejecuta en la terminal o consola:
 
