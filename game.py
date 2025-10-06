@@ -5,6 +5,7 @@ from jugador import Jugador
 from plataforma import Plataforma
 from enemigo import Enemigo
 from fragmento import Fragmento
+from niveles import cargar_nivel
 
 class Game:
     def __init__(self):
@@ -14,7 +15,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.mundo_dia = True
         self.running = True
-        self.nivel_completado = False
+        self.nivel_actual = 0
 
         # Grupos
         self.todos = pygame.sprite.Group()
@@ -26,28 +27,40 @@ class Game:
         self.jugador = Jugador()
         self.todos.add(self.jugador)
 
-        # Crear elementos
-        self.crear_plataformas()
-        self.crear_enemigos()
-        self.crear_fragmento()
+        # Cargar primer nivel
+        self.cargar_nivel(self.nivel_actual)
 
-    def crear_plataformas(self):
-        piso = Plataforma(0, ALTO-40, ANCHO, 40, "dia")
-        self.todos.add(piso)
-        self.plataformas.append(piso)
-        p1 = Plataforma(200, 400, 150, 20, "dia")
-        p2 = Plataforma(500, 300, 150, 20, "noche")
-        self.todos.add(p1, p2)
-        self.plataformas += [p1, p2]
+    def cargar_nivel(self, num):
+        self.todos.empty()
+        self.plataformas = []
+        self.enemigos.empty()
+        self.fragmentos.empty()
 
-    def crear_enemigos(self):
-        e1 = Enemigo(100, ALTO - 80, "dia")
-        e2 = Enemigo(600, 260, "noche")
-        self.todos.add(e1, e2)
-        self.enemigos.add(e1, e2)
+        # Siempre añadimos al jugador
+        self.todos.add(self.jugador)
+        self.jugador.rect.midbottom = (ANCHO // 2, ALTO - 50)
 
-    def crear_fragmento(self):
-        f = Fragmento(700, 250)
+        nivel = cargar_nivel(num)
+        if nivel is None:
+            self.mostrar_mensaje("¡Has completado todos los niveles! 🕰️")
+            self.running = False
+            return
+
+        # Crear plataformas
+        for x, y, w, h, mundo in nivel["plataformas"]:
+            p = Plataforma(x, y, w, h, mundo)
+            self.todos.add(p)
+            self.plataformas.append(p)
+
+        # Crear enemigos
+        for x, y, mundo in nivel["enemigos"]:
+            e = Enemigo(x, y, mundo)
+            self.todos.add(e)
+            self.enemigos.add(e)
+
+        # Crear fragmento
+        fx, fy = nivel["fragmento"]
+        f = Fragmento(fx, fy)
         self.todos.add(f)
         self.fragmentos.add(f)
 
@@ -55,19 +68,21 @@ class Game:
         # Enemigos activos
         for enemigo in self.enemigos:
             if enemigo.activo and self.jugador.rect.colliderect(enemigo.rect):
-                print("💀 Nilo ha sido derrotado.")
+                self.mostrar_mensaje("💀 Nilo ha sido derrotado.")
                 self.running = False
 
         # Fragmento
         for fragmento in self.fragmentos:
             if self.jugador.rect.colliderect(fragmento.rect):
                 fragmento.recoger()
-                self.nivel_completado = True
+                self.mostrar_mensaje("✨ Fragmento obtenido ✨")
+                self.nivel_actual += 1
+                self.cargar_nivel(self.nivel_actual)
 
     def mostrar_mensaje(self, texto):
         fuente = pygame.font.SysFont("arial", 40, True)
         render = fuente.render(texto, True, BLANCO)
-        rect = render.get_rect(center=(ANCHO//2, ALTO//2))
+        rect = render.get_rect(center=(ANCHO // 2, ALTO // 2))
         self.ventana.blit(render, rect)
         pygame.display.flip()
         pygame.time.wait(2000)
@@ -98,11 +113,6 @@ class Game:
 
             # Colisiones
             self.verificar_colisiones()
-
-            # Mostrar mensaje de victoria
-            if self.nivel_completado:
-                self.mostrar_mensaje("¡Fragmento obtenido! ✨")
-                self.running = False
 
             pygame.display.flip()
             self.clock.tick(FPS)

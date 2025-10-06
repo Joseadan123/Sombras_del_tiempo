@@ -1,5 +1,5 @@
 import pygame 
-from config import BLNACO, AMARILLO
+from config import BLANCO, AMARILLO
 
 class Fragmento(pygame.sprite.Sprite):
     def __init__(self, x, y):
