@@ -1,0 +1,25 @@
+Mejoras para el juego de plataformas "Sombras del Tiempo"
+
+Hacer que el salto y la caída sean más suaves: 
+- Implementar gravedad variable (caída más rápida, salto más natural).
+- Ajustar la aceleración y fricción lateral 
+- Añadir limites para que Nilo no salga de la pntalla 
+
+Agregar detección de muertes y reinicio del nivel:
+- Si toca un enemigo o cae -> 
+- aparecera un mensaje y el nivel se reinicia automáticamente. 
+
+Plataformas móviles o desaparecedora: 
+-  Plataformas que se mueven horizontal o verticalmente. 
+-  Plataformas que solo existen en un mundo (día o noche). 
+- Algunas que desaparecen al tocarlas. 
+
+Recolección de objetos secundarios (fragmentos menores):
+- Añadir pequeñas esferas de energía del tiempo (coleccionables).
+- Puede dar puntos o vida (de pensar).
+- Se muestan en el HUD más adeelante.
+
+Sistema de HUD básico: 
+- Nivel actual.
+- Fragmentos recolectados.
+- Estado del mundo (día/noche).

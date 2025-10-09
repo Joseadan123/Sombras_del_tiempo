@@ -1,4 +1,3 @@
-# plataforma.py
 import pygame
 from config import GRIS, VIOLETA
 

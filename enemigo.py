@@ -1,4 +1,3 @@
-# enemigo.py
 import pygame
 from config import NEGRO, BLANCO, ROJO, GRIS
 
