@@ -1,134 +1,101 @@
 # jugador.py
 import pygame
-from config import ANCHO, ALTO
 
 class Jugador(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-
-        # Superficie del personaje (dibujado manualmente)
-        self.image = pygame.Surface((34, 50), pygame.SRCALPHA)
-        self.rect = self.image.get_rect(midbottom=(ANCHO // 2, ALTO - 50))
+        self.image = pygame.Surface((40, 50), pygame.SRCALPHA)
+        self.rect = self.image.get_rect(midbottom=(200, 500))
+        self.hitbox = pygame.Rect(self.rect.x + 10, self.rect.y + 10, 20, 40)
 
         # Físicas
         self.vel_x = 0
         self.vel_y = 0
-        self.aceleracion = 0.5
-        self.friccion = -0.15
-        self.gravedad = 0.8
-        self.fuerza_salto = -15
-        self.velocidad_max = 6
-        self.en_suelo = True
-        self.mirando_derecha = True
+        self.en_suelo = False
+        self.gravedad = 0.6
+        self.salto = -12
+        self.velocidad = 6
 
-        # Colores base
-        self.color_cabeza = (255, 230, 200)
-        self.color_cuerpo = (200, 200, 200)
-        self.color_capa_dia = (255, 200, 0)
-        self.color_capa_noche = (100, 150, 255)
-        self.color_borde = (40, 40, 40)
+        # Animación básica
+        self.anim_tiempo = 0
+        self.anim_dir = 1
 
-        self.hitbox = self.rect.inflate(-6, -8)
+        # Estado del mundo
+        self.mundo_dia = True
+        self.actualizar_color(self.mundo_dia)
 
-    def mover(self, teclas):
-        if teclas[pygame.K_LEFT]:
-            self.vel_x -= self.aceleracion
-            self.mirando_derecha = False
-        elif teclas[pygame.K_RIGHT]:
-            self.vel_x += self.aceleracion
-            self.mirando_derecha = True
+    def actualizar_color(self, mundo_dia):
+        """Dibuja al personaje según el mundo (día o noche)."""
+        self.image.fill((0, 0, 0, 0))  # limpiar superficie transparente
+        self.mundo_dia = mundo_dia
+
+        # Colores según el momento del día
+        if mundo_dia:
+            capa = (255, 230, 80)
+            cuerpo = (180, 180, 200)
+            cabeza = (240, 240, 240)
+            detalle = (0, 0, 0)
         else:
-            if abs(self.vel_x) < 0.1:
-                self.vel_x = 0
-            else:
-                self.vel_x += self.vel_x * self.friccion
-        self.vel_x = max(-self.velocidad_max, min(self.vel_x, self.velocidad_max))
+            capa = (80, 120, 255)
+            cuerpo = (90, 90, 120)
+            cabeza = (200, 210, 255)
+            detalle = (255, 255, 255)
 
-    def aplicar_gravedad(self):
+        # Capa
+        pygame.draw.polygon(self.image, capa, [(5, 50), (20, 20), (35, 50)])
+
+        # Cuerpo
+        pygame.draw.rect(self.image, cuerpo, (12, 25, 16, 20))
+
+        # Cabeza
+        pygame.draw.circle(self.image, cabeza, (20, 15), 8)
+
+        # Ojos
+        pygame.draw.circle(self.image, detalle, (17, 13), 2)
+        pygame.draw.circle(self.image, detalle, (23, 13), 2)
+
+        # Sombra leve
+        pygame.draw.rect(self.image, (0, 0, 0, 60), (10, 48, 20, 2))
+
+    def update(self, teclas, plataformas, mundo_dia):
+        """Actualiza la posición, físicas y animación."""
+        self.actualizar_color(mundo_dia)
+
+        # Movimiento lateral
+        self.vel_x = 0
+        if teclas[pygame.K_LEFT]:
+            self.vel_x = -self.velocidad
+        if teclas[pygame.K_RIGHT]:
+            self.vel_x = self.velocidad
+
+        # Salto
+        if teclas[pygame.K_SPACE] and self.en_suelo:
+            self.vel_y = self.salto
+            self.en_suelo = False
+
+        # Gravedad
         self.vel_y += self.gravedad
         if self.vel_y > 10:
             self.vel_y = 10
 
-    def saltar(self):
-        if self.en_suelo:
-            self.vel_y = self.fuerza_salto
-            self.en_suelo = False
+        # Actualizar posición
+        self.rect.x += self.vel_x
+        self.rect.y += self.vel_y
+        self.hitbox.x = self.rect.x + 10
+        self.hitbox.y = self.rect.y + 10
 
-    def update(self, teclas, plataformas, mundo_dia=True):
-        self.mover(teclas)
-        self.aplicar_gravedad()
-
-        # Salto
-        if teclas[pygame.K_SPACE]:
-            self.saltar()
-
-        # Movimiento
-        self.rect.x += int(self.vel_x)
-        self.rect.y += int(self.vel_y)
-        self.hitbox.topleft = self.rect.topleft
-
-        # --- Colisiones verticales (versión estable) ---
+        # Colisiones con plataformas
         self.en_suelo = False
-        margen = 10
+        for p in plataformas:
+            if self.hitbox.colliderect(p.rect):
+                # Aterrizaje
+                if self.vel_y > 0 and self.hitbox.bottom <= p.rect.bottom:
+                    self.rect.bottom = p.rect.top + 10
+                    self.vel_y = 0
+                    self.en_suelo = True
 
-        # Primero, mover en Y y luego revisar colisiones
-        for plataforma in plataformas:
-            # Solo detectar si el jugador viene cayendo
-            if self.vel_y >= 0:
-                # Comprobación más suave del suelo
-                if (self.rect.bottom + margen > plataforma.rect.top and
-                    self.rect.bottom < plataforma.rect.bottom and
-                    self.rect.right > plataforma.rect.left + 5 and
-                    self.rect.left < plataforma.rect.right - 5):
-
-                    # Solo si el jugador está cayendo y justo encima
-                    if self.rect.bottom <= plataforma.rect.top + margen:
-                        self.rect.bottom = plataforma.rect.top
-                        self.vel_y = 0
-                        self.en_suelo = True
-                        self.hitbox.topleft = self.rect.topleft
-
-                        # Mover con plataforma si es móvil
-                        if hasattr(plataforma, "velocidad"):
-                            if plataforma.direccion == "horizontal":
-                                self.rect.x += plataforma.velocidad
-                            elif plataforma.direccion == "vertical":
-                                self.rect.y += plataforma.velocidad
-                            self.hitbox.topleft = self.rect.topleft
-                        break  # ✅ Detener tras encontrar una plataforma válida
-
-        # Límites del mapa
-        if self.rect.left < 0:
-            self.rect.left = 0
-            self.vel_x = 0
-        if self.rect.right > ANCHO:
-            self.rect.right = ANCHO
-            self.vel_x = 0
-        if self.rect.bottom > ALTO - 40:
-            self.rect.bottom = ALTO - 40
-            self.vel_y = 0
-            self.en_suelo = True
-
-        # Dibujar personaje
-        self.dibujar_personaje(mundo_dia)
-
-    def dibujar_personaje(self, mundo_dia):
-        """Dibuja al personaje con estilo pixel-art, sin sprites."""
-        self.image.fill((0, 0, 0, 0))
-        capa_color = self.color_capa_dia if mundo_dia else self.color_capa_noche
-
-        # Capa
-        pygame.draw.polygon(self.image, capa_color, [(6, 25), (28, 25), (30, 46), (4, 46)])
-        pygame.draw.line(self.image, (255, 255, 255), (8, 26), (26, 26), 1)
-
-        # Cuerpo
-        pygame.draw.rect(self.image, self.color_cuerpo, (10, 14, 14, 20), border_radius=3)
-        pygame.draw.rect(self.image, self.color_borde, (10, 14, 14, 20), 1, border_radius=3)
-
-        # Cabeza
-        pygame.draw.rect(self.image, self.color_cabeza, (11, 3, 12, 12), border_radius=3)
-        pygame.draw.rect(self.image, self.color_borde, (11, 3, 12, 12), 1, border_radius=3)
-
-        # Voltear si mira a la izquierda
-        if not self.mirando_derecha:
-            self.image = pygame.transform.flip(self.image, True, False)
+        # Pequeña animación de “respirar”
+        self.anim_tiempo += 0.05
+        self.rect.y += int(self.anim_dir * 0.2)
+        if abs(self.anim_tiempo) > 2:
+            self.anim_dir *= -1
