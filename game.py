@@ -33,6 +33,42 @@ class Game:
         # Cargar primer nivel
         self.cargar_nivel(self.nivel_actual)
 
+    # 🌄 --- NUEVA FUNCIÓN PARA FONDO DINÁMICO ---
+    def dibujar_fondo(self):
+        if self.mundo_dia:
+            # 🌞 Fondo de día
+            cielo = (120, 200, 255)
+            suelo = (80, 180, 100)
+            sol = (255, 255, 160)
+            # Cielo
+            self.ventana.fill(cielo)
+            # Sol
+            pygame.draw.circle(self.ventana, sol, (ANCHO - 120, 100), 60)
+            # Montañas lejanas
+            pygame.draw.polygon(self.ventana, (90, 160, 90), [(0, ALTO), (400, 320), (800, ALTO)])
+            pygame.draw.polygon(self.ventana, (60, 140, 60), [(400, ALTO), (900, 350), (ANCHO, ALTO)])
+            # Suelo base
+            pygame.draw.rect(self.ventana, suelo, (0, ALTO - 40, ANCHO, 40))
+        else:
+            # 🌙 Fondo de noche
+            cielo = (15, 15, 45)
+            suelo = (40, 60, 90)
+            luna = (220, 220, 255)
+            # Cielo
+            self.ventana.fill(cielo)
+            # Luna
+            pygame.draw.circle(self.ventana, luna, (ANCHO - 120, 100), 50)
+            # Montañas
+            pygame.draw.polygon(self.ventana, (30, 45, 75), [(0, ALTO), (400, 320), (800, ALTO)])
+            pygame.draw.polygon(self.ventana, (20, 30, 60), [(400, ALTO), (900, 350), (ANCHO, ALTO)])
+            # Suelo base
+            pygame.draw.rect(self.ventana, suelo, (0, ALTO - 40, ANCHO, 40))
+            # Estrellas
+            for i in range(20):
+                x = (i * 60) % ANCHO
+                y = 50 + (i * 23) % 30
+                pygame.draw.circle(self.ventana, (255, 255, 255), (x, y), 2)
+
     def cargar_nivel(self, num):
         self.todos.empty()
         self.plataformas = []
@@ -78,16 +114,13 @@ class Game:
         self.fragmentos.add(f)
 
     def verificar_colisiones(self):
-        # Si el jugador cae al vacío
         if self.jugador.rect.top > ALTO:
             self.morir(" Has caído al vacío...")
 
-        # Colisión con enemigos activos
         for enemigo in self.enemigos:
             if enemigo.activo and self.jugador.hitbox.colliderect(enemigo.rect):
                 self.morir(" Un enemigo te atrapó...")
 
-        # Colisión con fragmento (victoria)
         for fragmento in self.fragmentos:
             if self.jugador.rect.colliderect(fragmento.rect):
                 fragmento.recoger()
@@ -101,7 +134,6 @@ class Game:
         self.tiempo_muerte = pygame.time.get_ticks()
 
     def reiniciar_nivel(self):
-        # Reinicia al jugador y el nivel actual
         self.cargar_nivel(self.nivel_actual)
         self.muerto = False
 
@@ -125,26 +157,25 @@ class Game:
 
             teclas = pygame.key.get_pressed()
 
-            # Si está muerto, esperar un segundo antes de reiniciar
             if self.muerto:
                 if pygame.time.get_ticks() - self.tiempo_muerte > 1500:
                     self.reiniciar_nivel()
                 continue
 
+            # --- Fondo dinámico ---
+            self.dibujar_fondo()
+
             # Actualizar jugador
             self.jugador.update(teclas, self.plataformas, self.mundo_dia)
 
-            # Fondo
-            self.ventana.fill(AZUL if self.mundo_dia else MORADO)
-
-            # Actualizar enemigos y plataformas
+            # Actualizar plataformas y enemigos
             for p in self.plataformas:
                 p.actualizar_color(self.mundo_dia)
             for pm in self.plataformas_moviles:
                 pm.update(self.mundo_dia)
                 pm.actualizar_color(self.mundo_dia)
 
-            # Dibujar
+            # Dibujar sprites
             self.todos.draw(self.ventana)
 
             # Colisiones
