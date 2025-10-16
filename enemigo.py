@@ -23,12 +23,12 @@ class Enemigo(pygame.sprite.Sprite):
         self.image.fill((0, 0, 0, 0))  # limpiar fondo transparente
 
         if mundo_dia:
-            # 🌞 Enemigo de día: golem rojizo brillante
+            #  Enemigo de día: golem rojizo brillante
             cuerpo = (200, 80, 60)
             sombra = (150, 50, 40)
             ojo = (255, 255, 255)
         else:
-            # 🌙 Enemigo de noche: sombra oscura con ojos brillantes
+            #  Enemigo de noche: sombra oscura con ojos brillantes
             cuerpo = (40, 40, 70)
             sombra = (25, 25, 45)
             ojo = (120, 200, 255)
