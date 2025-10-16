@@ -33,7 +33,7 @@ class Game:
         # Cargar primer nivel
         self.cargar_nivel(self.nivel_actual)
 
-    # 🌄 --- NUEVA FUNCIÓN PARA FONDO DINÁMICO ---
+    #  --- NUEVA FUNCIÓN PARA FONDO DINÁMICO ---
     def dibujar_fondo(self):
         if self.mundo_dia:
             # 🌞 Fondo de día
@@ -50,7 +50,7 @@ class Game:
             # Suelo base
             pygame.draw.rect(self.ventana, suelo, (0, ALTO - 40, ANCHO, 40))
         else:
-            # 🌙 Fondo de noche
+            #  Fondo de noche
             cielo = (15, 15, 45)
             suelo = (40, 60, 90)
             luna = (220, 220, 255)
@@ -84,7 +84,7 @@ class Game:
 
         nivel = cargar_nivel(num)
         if nivel is None:
-            self.mostrar_mensaje("✨ ¡Has completado todos los niveles! 🕰️")
+            self.mostrar_mensaje("¡Has completado todos los niveles!")
             self.running = False
             return
 
@@ -162,7 +162,7 @@ class Game:
                     self.reiniciar_nivel()
                 continue
 
-            # --- Fondo dinámico ---
+            # Fondo dinámico 
             self.dibujar_fondo()
 
             # Actualizar jugador
