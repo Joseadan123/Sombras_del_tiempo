@@ -1,4 +1,3 @@
-# plataforma_movil.py
 import pygame
 
 class PlataformaMovil(pygame.sprite.Sprite):
@@ -11,6 +10,7 @@ class PlataformaMovil(pygame.sprite.Sprite):
         self.rango = rango
         self.velocidad = velocidad
         self.pos_inicial = (x, y)
+        self.visible = True
 
         # Colores similares a las plataformas normales, pero más vivos
         self.color_dia = (100, 200, 255)    # Azul celeste para día
@@ -37,27 +37,44 @@ class PlataformaMovil(pygame.sprite.Sprite):
         # Brillo superior
         pygame.draw.rect(self.image, self.color_brillo, (0, 0, self.rect.width, 4), border_radius=6)
 
-        # Sombra proyectada (profundidad)
+        # Sombra proyectada
         sombra = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)
         pygame.draw.rect(sombra, self.color_sombra, (0, 0, self.rect.width, self.rect.height), border_radius=6)
         self.image.blit(sombra, (3, 3), special_flags=pygame.BLEND_RGBA_SUB)
 
         # Ajustar visibilidad según el mundo
-        visible = (self.mundo == "dia" and mundo_dia) or (self.mundo == "noche" and not mundo_dia)
-        self.image.set_alpha(255 if visible else 60)
+        self.visible = (self.mundo == "dia" and mundo_dia) or (self.mundo == "noche" and not mundo_dia)
+        self.image.set_alpha(255 if self.visible else 60)
 
-    def update(self, mundo_dia):
-        """Actualiza movimiento y visibilidad."""
-        visible = (self.mundo == "dia" and mundo_dia) or (self.mundo == "noche" and not mundo_dia)
-        if not visible:
-            return
+    def update(self, mundo_dia, jugador=None):
+        """Actualiza movimiento, visibilidad y arrastre del jugador."""
+        self.visible = (self.mundo == "dia" and mundo_dia) or (self.mundo == "noche" and not mundo_dia)
+
+        if not self.visible:
+            return  # No se mueve ni colisiona si no es visible
+
+        movimiento_x, movimiento_y = 0, 0
 
         # Movimiento horizontal o vertical
         if self.direccion == "horizontal":
             self.rect.x += self.velocidad
+            movimiento_x = self.velocidad
             if abs(self.rect.x - self.pos_inicial[0]) >= self.rango:
                 self.velocidad *= -1
         elif self.direccion == "vertical":
             self.rect.y += self.velocidad
+            movimiento_y = self.velocidad
             if abs(self.rect.y - self.pos_inicial[1]) >= self.rango:
                 self.velocidad *= -1
+
+        # --- Colisión con jugador ---
+        if jugador and jugador.rect.colliderect(self.rect):
+            # Verificar si el jugador está encima (solo si cae sobre ella)
+            if jugador.rect.bottom <= self.rect.top + 10 and jugador.vel_y >= 0:
+                jugador.rect.bottom = self.rect.top
+                jugador.vel_y = 0
+                jugador.en_suelo = True
+
+                # --- Movimiento con la plataforma ---
+                jugador.rect.x += movimiento_x
+                jugador.rect.y += movimiento_y

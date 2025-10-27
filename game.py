@@ -1,4 +1,3 @@
-# game.py
 import pygame, sys
 from config import ANCHO, ALTO, FPS, AZUL, MORADO, BLANCO
 from jugador import Jugador
@@ -17,114 +16,89 @@ class Game:
         self.mundo_dia = True
         self.running = True
         self.nivel_actual = 0
-        self.muerto = False  # Estado de muerte
+        self.muerto = False
         self.tiempo_muerte = 0
+
+        # Fondos
+        self.fondo_dia = pygame.image.load("assets/dias.png").convert()
+        self.fondo_dia = pygame.transform.scale(self.fondo_dia, (ANCHO, ALTO))
+        self.fondo_noche = pygame.image.load("assets/noche.png").convert()
+        self.fondo_noche = pygame.transform.scale(self.fondo_noche, (ANCHO, ALTO))
 
         # Grupos
         self.todos = pygame.sprite.Group()
         self.plataformas = []
         self.enemigos = pygame.sprite.Group()
         self.fragmentos = pygame.sprite.Group()
+        self.plataformas_moviles = []
 
         # Jugador
         self.jugador = Jugador()
         self.todos.add(self.jugador)
 
-        # Cargar primer nivel
         self.cargar_nivel(self.nivel_actual)
 
-    #  --- NUEVA FUNCIÓN PARA FONDO DINÁMICO ---
     def dibujar_fondo(self):
-        if self.mundo_dia:
-            # 🌞 Fondo de día
-            cielo = (120, 200, 255)
-            suelo = (80, 180, 100)
-            sol = (255, 255, 160)
-            # Cielo
-            self.ventana.fill(cielo)
-            # Sol
-            pygame.draw.circle(self.ventana, sol, (ANCHO - 120, 100), 60)
-            # Montañas lejanas
-            pygame.draw.polygon(self.ventana, (90, 160, 90), [(0, ALTO), (400, 320), (800, ALTO)])
-            pygame.draw.polygon(self.ventana, (60, 140, 60), [(400, ALTO), (900, 350), (ANCHO, ALTO)])
-            # Suelo base
-            pygame.draw.rect(self.ventana, suelo, (0, ALTO - 40, ANCHO, 40))
-        else:
-            #  Fondo de noche
-            cielo = (15, 15, 45)
-            suelo = (40, 60, 90)
-            luna = (220, 220, 255)
-            # Cielo
-            self.ventana.fill(cielo)
-            # Luna
-            pygame.draw.circle(self.ventana, luna, (ANCHO - 120, 100), 50)
-            # Montañas
-            pygame.draw.polygon(self.ventana, (30, 45, 75), [(0, ALTO), (400, 320), (800, ALTO)])
-            pygame.draw.polygon(self.ventana, (20, 30, 60), [(400, ALTO), (900, 350), (ANCHO, ALTO)])
-            # Suelo base
-            pygame.draw.rect(self.ventana, suelo, (0, ALTO - 40, ANCHO, 40))
-            # Estrellas
-            for i in range(20):
-                x = (i * 60) % ANCHO
-                y = 50 + (i * 23) % 30
-                pygame.draw.circle(self.ventana, (255, 255, 255), (x, y), 2)
+        fondo = self.fondo_dia if self.mundo_dia else self.fondo_noche
+        self.ventana.blit(fondo, (0, 0))
 
     def cargar_nivel(self, num):
+        datos = cargar_nivel(num)
+        if datos is None:
+            self.mostrar_mensaje("✨ ¡Has completado todos los niveles! 🕰️")
+            pygame.quit()
+            sys.exit()
+
+        # Limpiar grupos
         self.todos.empty()
-        self.plataformas = []
         self.enemigos.empty()
         self.fragmentos.empty()
+        self.plataformas_moviles.clear()
+        self.plataformas.clear()
 
-        # Añadimos jugador
-        self.todos.add(self.jugador)
-        self.jugador.rect.midbottom = (ANCHO // 2, ALTO - 50)
+        # Reiniciar jugador
+        self.jugador.rect.midbottom = (ANCHO // 2, ALTO - 100)
         self.jugador.vel_x = 0
         self.jugador.vel_y = 0
-        self.jugador.en_suelo = True
+        self.jugador.en_suelo = False
+        self.todos.add(self.jugador)
 
-        nivel = cargar_nivel(num)
-        if nivel is None:
-            self.mostrar_mensaje("¡Has completado todos los niveles!")
-            self.running = False
-            return
-
-        # Crear plataformas normales
-        for x, y, w, h, mundo in nivel["plataformas"]:
+        # Cargar plataformas
+        for x, y, w, h, mundo in datos["plataformas"]:
             p = Plataforma(x, y, w, h, mundo)
             self.todos.add(p)
             self.plataformas.append(p)
 
-        # Crear plataformas móviles
-        self.plataformas_moviles = []
-        for x, y, w, h, mundo, dir, rango, vel in nivel["moviles"]:
-            p = PlataformaMovil(x, y, w, h, mundo, dir, rango, vel)
-            self.todos.add(p)
-            self.plataformas_moviles.append(p)
+        # Cargar plataformas móviles
+        for x, y, w, h, mundo, dir, rango, vel in datos["moviles"]:
+            pm = PlataformaMovil(x, y, w, h, mundo, dir, rango, vel)
+            self.todos.add(pm)
+            self.plataformas_moviles.append(pm)
 
-        # Crear enemigos
-        for x, y, mundo in nivel["enemigos"]:
+        # Cargar enemigos
+        for x, y, mundo in datos["enemigos"]:
             e = Enemigo(x, y, mundo)
             self.todos.add(e)
             self.enemigos.add(e)
 
-        # Crear fragmento
-        fx, fy = nivel["fragmento"]
+        # Cargar fragmento
+        fx, fy = datos["fragmento"]
         f = Fragmento(fx, fy)
         self.todos.add(f)
         self.fragmentos.add(f)
 
     def verificar_colisiones(self):
         if self.jugador.rect.top > ALTO:
-            self.morir(" Has caído al vacío...")
+            self.morir("Has caído al vacío...")
 
         for enemigo in self.enemigos:
             if enemigo.activo and self.jugador.hitbox.colliderect(enemigo.rect):
-                self.morir(" Un enemigo te atrapó...")
+                self.morir("Un enemigo te atrapó...")
 
         for fragmento in self.fragmentos:
             if self.jugador.rect.colliderect(fragmento.rect):
                 fragmento.recoger()
-                self.mostrar_mensaje("Fragmento obtenido ")
+                self.mostrar_mensaje("Fragmento obtenido ✨")
                 self.nivel_actual += 1
                 self.cargar_nivel(self.nivel_actual)
 
@@ -132,6 +106,11 @@ class Game:
         self.mostrar_mensaje(mensaje)
         self.muerto = True
         self.tiempo_muerte = pygame.time.get_ticks()
+
+        # Reinicia al primer nivel
+        self.nivel_actual = 0
+        self.mundo_dia = True
+        self.reiniciar_nivel()
 
     def reiniciar_nivel(self):
         self.cargar_nivel(self.nivel_actual)
@@ -161,24 +140,31 @@ class Game:
                 if pygame.time.get_ticks() - self.tiempo_muerte > 1500:
                     self.reiniciar_nivel()
                 continue
+        
+            # Actualizar fragmento animado
+            for f in self.fragmentos:
+                f.update()
 
-            # Fondo dinámico 
+            # Fondo dinámico
             self.dibujar_fondo()
 
             # Actualizar jugador
-            self.jugador.update(teclas, self.plataformas, self.mundo_dia)
+            self.jugador.update(teclas, self.plataformas + self.plataformas_moviles, self.mundo_dia)
 
-            # Actualizar plataformas y enemigos
+            # Actualizar plataformas móviles
+            for pm in self.plataformas_moviles:
+                pm.update(self.mundo_dia)
+
+            # Actualizar colores de plataformas
             for p in self.plataformas:
                 p.actualizar_color(self.mundo_dia)
             for pm in self.plataformas_moviles:
-                pm.update(self.mundo_dia)
                 pm.actualizar_color(self.mundo_dia)
 
-            # Dibujar sprites
+            # Dibujar todo
             self.todos.draw(self.ventana)
 
-            # Colisiones
+            # Verificar colisiones
             self.verificar_colisiones()
 
             pygame.display.flip()
