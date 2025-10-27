@@ -49,6 +49,8 @@ class Game:
             pygame.quit()
             sys.exit()
 
+        self.mundo_dia = True
+
         # Limpiar grupos
         self.todos.empty()
         self.enemigos.empty()

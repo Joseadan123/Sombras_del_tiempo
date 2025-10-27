@@ -71,7 +71,7 @@ def cargar_nivel(nivel_num):
 
             "enemigos": [
                 # --- Suelo ---
-                (500, ALTO - 80, "dia"),
+                (500, ALTO - 90, "dia"),
                 (1000, ALTO - 80, "dia"),
                 (1400, ALTO - 80, "noche"),
                 (1800, ALTO - 80, "dia"),
@@ -85,52 +85,84 @@ def cargar_nivel(nivel_num):
                 (4000, ALTO - 200, "noche"),
             ],
 
-            "fragmento": (450, ALTO - 140)
+            "fragmento": (730, ALTO - 350)
         },
 
         # 🕳 Nivel 2 - Introducción a plataformas móviles
+                # 🕳 Nivel 2 - Introducción a plataformas móviles
         {
             "plataformas": [
+                # Piso base
                 (0, ALTO - 40, 800, 40, "dia"),
-                (150, 420, 150, 20, "dia"),
-                (600, 280, 150, 20, "noche"),
-                (900, 340, 150, 20, "dia"),
-                (1200, 300, 150, 20, "noche"),
-            ],
-            "moviles": [
-                (300, 380, 100, 20, "dia", "horizontal", 150, 2),
-                (500, 300, 100, 20, "noche", "vertical", 80, 2),
-                (800, 260, 100, 20, "dia", "horizontal", 100, 3),
-            ],
-            "enemigos": [
-                (400, ALTO - 80, "dia"),
-                (550, 320, "noche"),
-                (1000, 260, "dia"),
-            ],
-            "fragmento": (1350, 240)
-        },
+                (0, ALTO - 40, 800, 40, "noche"),  
 
-        # 🕰 Nivel 3 - Avanzado y más vertical
+                # Plataformas intermedias
+                (150, 500, 150, 20, "dia"),
+                (400, 440, 150, 20, "noche"),
+                (650, 380, 150, 20, "dia"),
+
+                # Plataformas elevadas
+                (250, 320, 150, 20, "noche"),
+                (550, 260, 150, 20, "dia"),
+
+                # Plataforma final (cerca del fragmento)
+                (700, 220, 100, 20, "noche"),
+            ],
+
+            "moviles": [
+                # Plataformas móviles que conectan secciones
+                (300, 420, 100, 20, "dia", "horizontal", 80, 2),
+                (500, 300, 100, 20, "noche", "vertical", 60, 2),
+                (600, 340, 100, 20, "dia", "horizontal", 100, 3),
+            ],
+
+            "enemigos": [
+                (700, 400, "dia"),
+            ],
+
+            # Fragmento al final, visible dentro del ancho
+            "fragmento": (750, 180)
+        },
+        # 🕰 Nivel 3 - Las Torres del Tiempo (Optimizado)
         {
             "plataformas": [
+                # Base
                 (0, ALTO - 40, 800, 40, "dia"),
-                (150, 420, 150, 20, "noche"),
-                (350, 360, 150, 20, "dia"),
-                (600, 320, 150, 20, "noche"),
-                (850, 280, 150, 20, "dia"),
+
+                # Plataforma baja (inicio de ascenso)
+                (200, 500, 150, 20, "dia"),
+
+                # Plataforma intermedia
+                (450, 420, 150, 20, "noche"),
+
+                # Plataforma media-alta
+                (650, 340, 150, 20, "dia"),
+
+                # Plataforma alta (previo al fragmento)
+                (400, 260, 150, 20, "noche"),
             ],
+
             "moviles": [
-                (200, 330, 100, 20, "dia", "horizontal", 120, 3),
-                (500, 270, 100, 20, "noche", "vertical", 100, 2),
-                (800, 240, 100, 20, "dia", "horizontal", 140, 2),
+                # Plataforma móvil horizontal (zona media)
+                (300, 400, 100, 20, "dia", "horizontal", 120, 2),
+
+                # Plataforma móvil vertical (sube hasta la parte alta)
+                (600, 300, 100, 20, "noche", "vertical", 80, 2),
             ],
+
             "enemigos": [
-                (200, ALTO - 80, "dia"),
-                (400, 320, "noche"),
-                (600, 260, "dia"),
-                (900, 260, "noche"),
+                # Enemigo en el suelo
+                (250, ALTO - 80, "dia"),
+
+                # Enemigo en zona media
+                (500, 380, "noche"),
+
+                # Enemigo alto (protege fragmento)
+                (650, 280, "dia"),
             ],
-            "fragmento": (1050, 200)
+
+            # Fragmento en zona visible y accesible desde las plataformas altas
+            "fragmento": (720, 220)
         }
     ]
 
