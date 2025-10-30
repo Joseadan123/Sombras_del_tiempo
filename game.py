@@ -45,7 +45,7 @@ class Game:
     def cargar_nivel(self, num):
         datos = cargar_nivel(num)
         if datos is None:
-            self.mostrar_mensaje("✨ ¡Has completado todos los niveles! 🕰️")
+            self.mostrar_mensaje(" ¡Has completado todos los niveles! ")
             pygame.quit()
             sys.exit()
 
@@ -79,7 +79,7 @@ class Game:
 
         # Cargar enemigos
         for x, y, mundo in datos["enemigos"]:
-            e = Enemigo(x, y, mundo)
+            e = Enemigo(x, y, mundo, rango=120, velocidad=2)
             self.todos.add(e)
             self.enemigos.add(e)
 
@@ -156,6 +156,10 @@ class Game:
             # Actualizar plataformas móviles
             for pm in self.plataformas_moviles:
                 pm.update(self.mundo_dia)
+
+            # Actualizar enemigos
+            for e in self.enemigos:
+                e.update(self.mundo_dia)
 
             # Actualizar colores de plataformas
             for p in self.plataformas:
