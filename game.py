@@ -37,7 +37,11 @@ class Game:
         self.jugador = Jugador()
         self.todos.add(self.jugador)
 
+        # Tiempo de inicio
+        self.tiempo_inicio = pygame.time.get_ticks()
+
         self.cargar_nivel(self.nivel_actual)
+
 
     def dibujar_fondo(self):
         fondo = self.fondo_dia if self.mundo_dia else self.fondo_noche
@@ -52,6 +56,8 @@ class Game:
             return
 
         self.mundo_dia = True
+        # Reiniciar contador de tiempo al cargar nivel
+        self.tiempo_inicio = pygame.time.get_ticks()
 
         # Limpiar grupos
         self.todos.empty()
@@ -90,6 +96,21 @@ class Game:
         f = Fragmento(fx, fy)
         self.todos.add(f)
         self.fragmentos.add(f)
+    
+    def mostrar_tiempo(self):
+        tiempo_actual = pygame.time.get_ticks()
+        tiempo_restante = max(0, 30 - (tiempo_actual - self.tiempo_inicio) // 1000)
+
+        fuente = pygame.font.SysFont("arial", 30, True)
+        texto = fuente.render(f"Tiempo: {tiempo_restante}", True, BLANCO)
+        # Mostrar en la esquina superior izquierda
+        self.ventana.blit(texto, (10, 10))
+
+        if tiempo_restante <= 0:
+            self.morir("Tiempo agotado")
+            self.nivel_actual = 0
+            self.mundo_dia = True 
+            self.reiniciar_nivel()
 
     def verificar_colisiones(self):
         if self.jugador.rect.top > ALTO:
@@ -171,6 +192,9 @@ class Game:
 
             # Dibujar todo
             self.todos.draw(self.ventana)
+
+            # Dibujar tiempo en pantalla
+            self.mostrar_tiempo()
 
             # Verificar colisiones
             self.verificar_colisiones()
