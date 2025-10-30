@@ -18,6 +18,7 @@ class Game:
         self.nivel_actual = 0
         self.muerto = False
         self.tiempo_muerte = 0
+        self.completed = False
 
         # Fondos
         self.fondo_dia = pygame.image.load("assets/dias.png").convert()
@@ -46,8 +47,9 @@ class Game:
         datos = cargar_nivel(num)
         if datos is None:
             self.mostrar_mensaje(" ¡Has completado todos los niveles! ")
-            pygame.quit()
-            sys.exit()
+            self.completed = True
+            self.running = False
+            return
 
         self.mundo_dia = True
 
