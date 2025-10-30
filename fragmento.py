@@ -26,7 +26,7 @@ class Fragmento(pygame.sprite.Sprite):
         self.rect.y = self.base_y + math.sin(self.tiempo) * 5  # sube y baja suavemente
 
         # Parpadeo del brillo
-        intensidad = 200 + int(55 * abs(math.sin(self.tiempo * 2)))
+        intensidad = 50 + int(55 * abs(math.sin(self.tiempo * 2)))
         
         # Crear un efecto de brillo alrededor
         self.image = self.image_base.copy()
