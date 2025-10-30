@@ -50,7 +50,7 @@ class Game:
     def cargar_nivel(self, num):
         datos = cargar_nivel(num)
         if datos is None:
-            self.mostrar_mensaje(" ¡Has completado todos los niveles! ")
+            self.mostrar_mensaje("¡Ganaste!")
             self.completed = True
             self.running = False
             return
@@ -123,7 +123,9 @@ class Game:
         for fragmento in self.fragmentos:
             if self.jugador.rect.colliderect(fragmento.rect):
                 fragmento.recoger()
-                self.mostrar_mensaje("Fragmento obtenido ✨")
+                # Mostrar mensaje solo si NO es el último nivel
+                if self.nivel_actual < 2:
+                    self.mostrar_mensaje("Fragmento obtenido ✨")
                 self.nivel_actual += 1
                 self.cargar_nivel(self.nivel_actual)
 
